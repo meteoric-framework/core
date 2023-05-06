@@ -1,0 +1,91 @@
+{
+  "name": "@meteoric/core",
+  "version": "0.0.0-development",
+  "description": "The core library of the meteoric framework.",
+  "keywords": [
+    "core",
+    "core-library",
+    "framework",
+    "library",
+    "meteoric",
+    "meteoric-framework"
+  ],
+  "homepage": "https://github.com/meteoric-framework/core",
+  "bugs": "https://github.com/meteoric-framework/core/issues",
+  "license": "MIT",
+  "author": "Aadit M Shah <aaditmshah@aadit.codes> (https://aadit.codes/)",
+  "funding": [
+    {
+      "type": "individual",
+      "url": "https://aadit.codes/sponsor"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/aaditmshah"
+    },
+    {
+      "type": "opencollective",
+      "url": "https://opencollective.com/aaditmshah"
+    },
+    {
+      "type": "patreon",
+      "url": "https://www.patreon.com/aaditmshah"
+    },
+    {
+      "type": "ko-fi",
+      "url": "https://ko-fi.com/aaditmshah"
+    },
+    {
+      "type": "buymeacoffee",
+      "url": "https://www.buymeacoffee.com/aaditmshah"
+    }
+  ],
+  "files": [
+    "lib"
+  ],
+  "type": "module",
+  "exports": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "repository": "github:meteoric-framework/core",
+  "scripts": {
+    "clean": "git clean -fdx",
+    "prettier:write": "prettier --write .",
+    "prettier:check": "prettier --check .",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "rm -rf coverage && jest",
+    "build": "rm -rf lib && tsc -p tsconfig.build.json",
+    "check": "concurrently --kill-others-on-fail 'pnpm prettier:check' 'pnpm lint' 'pnpm typecheck' 'pnpm test' 'pnpm build'",
+    "prepare": "is-ci || husky install"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.5.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@types/node": "^18.16.3",
+    "@typescript-eslint/eslint-plugin": "^5.59.2",
+    "@typescript-eslint/parser": "^5.59.2",
+    "concurrently": "^8.0.1",
+    "eslint": "^8.39.0",
+    "eslint-import-resolver-typescript": "^3.5.5",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jest": "^27.2.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-unicorn": "^46.0.0",
+    "fast-check": "^3.8.1",
+    "gitmoji-cli": "^8.1.1",
+    "husky": "^8.0.3",
+    "is-ci": "^3.0.1",
+    "jest": "^29.5.0",
+    "prettier": "^2.8.8",
+    "semantic-release": "^21.0.2",
+    "semantic-release-gitmoji": "^1.6.4",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.4"
+  },
+  "engines": {
+    "node": ">=16.9"
+  }
+}
