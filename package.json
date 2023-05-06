@@ -1,6 +1,6 @@
 {
   "name": "@meteoric/core",
-  "version": "0.0.0-development",
+  "version": "1.0.0",
   "description": "The core library of the meteoric framework.",
   "keywords": [
     "core",
