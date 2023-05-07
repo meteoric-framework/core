@@ -1,6 +1,6 @@
 import { OptionExtractError } from "./errors.js";
 
-interface OptionOps<out A> {
+interface OptionMethods<out A> {
   readonly some: boolean;
 
   readonly map: <B>(morphism: (value: A) => B) => Option<B>;
@@ -14,7 +14,7 @@ interface OptionOps<out A> {
   readonly unsafeExtract: (message: string) => A;
 }
 
-class Some<out A> implements OptionOps<A> {
+class Some<out A> implements OptionMethods<A> {
   public readonly some = true;
 
   public constructor(public readonly value: A) {}
@@ -40,7 +40,7 @@ class Some<out A> implements OptionOps<A> {
   }
 }
 
-class None<out A> implements OptionOps<A> {
+class None<out A> implements OptionMethods<A> {
   public readonly some = false;
 
   public map<B>(): None<B> {
@@ -75,5 +75,5 @@ const optionPredicate =
   (value: A): Option<A> =>
     predicate(value) ? new Some(value) : none;
 
-export type { OptionOps, Some, None, Option };
+export type { OptionMethods, Some, None, Option };
 export { some, none, optionPredicate };
