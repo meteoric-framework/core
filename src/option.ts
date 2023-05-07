@@ -75,5 +75,5 @@ const optionPredicate =
   (value: A): Option<A> =>
     predicate(value) ? new Some(value) : none;
 
-export type { Some, None, Option };
+export type { OptionOps, Some, None, Option };
 export { some, none, optionPredicate };
