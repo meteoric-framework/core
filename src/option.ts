@@ -1,5 +1,3 @@
-import { OptionExtractError } from "./errors.js";
-
 type Option<A> = Some<A> | None<A>;
 
 interface OptionMethods<out A> {
@@ -72,6 +70,24 @@ class None<out A> implements OptionMethods<A> {
   }
 }
 
+class OptionExtractError extends Error {
+  public constructor(message: string) {
+    super(message);
+
+    Object.defineProperty(this, "name", {
+      value: "OptionExtractError",
+      enumerable: false,
+      configurable: true,
+    });
+
+    Object.setPrototypeOf(this, OptionExtractError.prototype);
+
+    if ("captureStackTrace" in Error) {
+      Error.captureStackTrace(this, OptionExtractError);
+    }
+  }
+}
+
 const some = <A>(value: A): Some<A> => new Some(value);
 
 const none = new None<never>();
@@ -82,4 +98,4 @@ const optionPredicate =
     predicate(value) ? new Some(value) : none;
 
 export type { OptionMethods, Some, None, Option };
-export { some, none, optionPredicate };
+export { OptionExtractError, some, none, optionPredicate };
