@@ -19,7 +19,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "pnpm prettier:write"
+        "prepareCmd": "pnpm doc"
       }
     ],
     "@semantic-release/npm",
