@@ -17,9 +17,11 @@ interface OptionMethods<out A> {
 }
 
 class Some<out A> implements OptionMethods<A> {
-  public readonly some = true;
+  public readonly some: true;
 
-  public constructor(public readonly value: A) {}
+  public constructor(public readonly value: A) {
+    this.some = true;
+  }
 
   public map<B>(morphism: (value: A) => B): Some<B> {
     return new Some(morphism(this.value));
@@ -43,7 +45,11 @@ class Some<out A> implements OptionMethods<A> {
 }
 
 class None<out A> implements OptionMethods<A> {
-  public readonly some = false;
+  public readonly some: false;
+
+  public constructor() {
+    this.some = false;
+  }
 
   public map<B>(): None<B> {
     return none;
