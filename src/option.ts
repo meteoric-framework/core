@@ -1,5 +1,7 @@
 import { OptionExtractError } from "./errors.js";
 
+type Option<A> = Some<A> | None<A>;
+
 interface OptionMethods<out A> {
   readonly some: boolean;
 
@@ -67,8 +69,6 @@ class None<out A> implements OptionMethods<A> {
 const some = <A>(value: A): Some<A> => new Some(value);
 
 const none = new None<never>();
-
-type Option<A> = Some<A> | None<A>;
 
 const optionPredicate =
   <A>(predicate: (value: A) => boolean) =>
