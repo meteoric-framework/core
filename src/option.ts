@@ -147,6 +147,32 @@ interface OptionMethods<out A> {
   readonly isSome: boolean;
 
   /**
+   * The value of {@link OptionMethods.isNone | isNone} is `true` when the
+   * {@link Option} is {@link None}, and it's `false` when the {@link Option} is
+   * {@link Some}.
+   *
+   * @category Discriminating an option
+   *
+   * @example
+   * The {@link OptionMethods.isNone | isNone} property is used for
+   * discriminating an {@link Option}:
+   *
+   * ```ts
+   * const getMessage = (): Option<string> =>
+   *   Math.random() < 0.5 ? some("Hello World!") : none;
+   *
+   * const message = getMessage();
+   *
+   * if (message.isNone) {
+   *   console.log("Did not receive a message");
+   * } else {
+   *   console.log(message.value);
+   * }
+   * ```
+   */
+  readonly isNone: boolean;
+
+  /**
    * Returns {@link None} if the {@link Option} is {@link None}. Otherwise,
    * returns a new {@link Some} containing the result of applying the `morphism`
    * to the value contained in the input {@link Some}.
@@ -340,6 +366,8 @@ interface OptionMethods<out A> {
 class Some<out A> implements OptionMethods<A> {
   public readonly isSome: true;
 
+  public readonly isNone: false;
+
   /**
    * Constructs a new {@link Some} with the provided `value`.
    *
@@ -349,6 +377,7 @@ class Some<out A> implements OptionMethods<A> {
    */
   public constructor(public readonly value: A) {
     this.isSome = true;
+    this.isNone = false;
   }
 
   public map<B>(morphism: (value: A) => B): Some<B> {
@@ -387,6 +416,8 @@ class Some<out A> implements OptionMethods<A> {
 class None<out A> implements OptionMethods<A> {
   public readonly isSome: false;
 
+  public readonly isNone: true;
+
   /**
    * Constructs a new {@link None} with the provided phantom type `A`.
    *
@@ -395,6 +426,7 @@ class None<out A> implements OptionMethods<A> {
    */
   public constructor() {
     this.isSome = false;
+    this.isNone = true;
   }
 
   public map<B>(): None<B> {
