@@ -56,7 +56,7 @@
     "test": "rm -rf coverage && jest",
     "build": "rm -rf lib && tsc -p tsconfig.build.json",
     "check": "concurrently --kill-others-on-fail 'pnpm prettier:check' 'pnpm lint' 'pnpm typecheck' 'pnpm test' 'pnpm build'",
-    "doc": "rm -rf docs && typedoc && pnpm prettier:write",
+    "doc": "rm -rf docs && typedoc",
     "prepare": "is-ci || husky install"
   },
   "devDependencies": {
