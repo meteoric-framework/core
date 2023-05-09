@@ -55,6 +55,8 @@
  *   value.
  * - {@link OptionMethods.flatMap | flatMap} returns the {@link Option} obtained
  *   by applying the provided function to the contained value of {@link Some}.
+ * - {@link OptionMethods.filter | filter} returns the input {@link Some} if the
+ *   contained value satisfies the predicate, or else it returns {@link None}.
  *
  * @example
  * Basic pattern matching on an {@link Option}:
@@ -211,6 +213,37 @@ interface OptionMethods<out A> {
   readonly flatMap: <B>(arrow: (value: A) => Option<B>) => Option<B>;
 
   /**
+   * Returns {@link None} if the {@link Option} is {@link None} or if the
+   * contained {@link Some} value fails the `predicate` check. Otherwise,
+   * returns the input {@link Some}.
+   *
+   * @category Transforming contained values
+   *
+   * @example
+   * ```ts
+   * const random = (max: number): number =>
+   *   Math.floor(max * Math.random());
+   *
+   * const isOdd = (n: number): boolean => n % 2 === 1;
+   *
+   * const isSquare = (n: number): boolean => Math.sqrt(n) % 1 === 0;
+   *
+   * const number = some(random(10)).filter(isOdd).filter(isSquare);
+   *
+   * if (number.some) {
+   *   console.log(`${number.value} is an odd square`);
+   * } else {
+   *   console.log("Did not see an odd square");
+   * }
+   * ```
+   *
+   * @param predicate - The function to test the {@link Option}'s value.
+   * @returns A input {@link Some} if the contained value passed the `predicate`
+   * check, or {@link None}.
+   */
+  readonly filter: (predicate: (value: A) => boolean) => Option<A>;
+
+  /**
    * Returns the contained {@link Some} value, or `defaultValue` when
    * {@link Option} is {@link None}.
    *
@@ -326,6 +359,10 @@ class Some<out A> implements OptionMethods<A> {
     return arrow(this.value);
   }
 
+  public filter(predicate: (value: A) => boolean): Option<A> {
+    return predicate(this.value) ? this : none;
+  }
+
   public safeExtract(): A {
     return this.value;
   }
@@ -366,6 +403,10 @@ class None<out A> implements OptionMethods<A> {
 
   public flatMap<B>(): None<B> {
     return none;
+  }
+
+  public filter(): this {
+    return this;
   }
 
   public safeExtract<B extends A>(defaultValue: B): A {

@@ -72,6 +72,42 @@ describe("option", () => {
     });
   });
 
+  describe("filter", () => {
+    it("should be distributive", () => {
+      expect.assertions(100);
+      fc.assert(
+        fc.property(
+          genOption(fc.anything()),
+          fc.func(fc.boolean()),
+          fc.func(fc.boolean()),
+          <A>(m: Option<A>, p: (a: A) => boolean, q: (a: A) => boolean) => {
+            expect(m.filter((x) => p(x)).filter((x) => q(x))).toStrictEqual(
+              m.filter((x) => p(x) && q(x))
+            );
+          }
+        )
+      );
+    });
+
+    it("should have an identity input", () => {
+      expect.assertions(100);
+      fc.assert(
+        fc.property(genOption(fc.anything()), <A>(m: Option<A>) => {
+          expect(m.filter(() => true)).toStrictEqual(m);
+        })
+      );
+    });
+
+    it("should have an annihilating input", () => {
+      expect.assertions(100);
+      fc.assert(
+        fc.property(genOption(fc.anything()), <A>(m: Option<A>) => {
+          expect(m.filter(() => false)).toStrictEqual(none);
+        })
+      );
+    });
+  });
+
   describe("safeExtract", () => {
     it("should extract the value from some", () => {
       expect.assertions(100);
