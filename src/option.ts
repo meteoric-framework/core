@@ -11,9 +11,10 @@
  * - Nullable values.
  *
  * @remarks
- * {@link Option}s are commonly paired with pattern matching to query the
- * presence of a value and take action, always accounting for the {@link None}
- * case.
+ * {@link Option}s are commonly discriminated by querying the
+ * {@link OptionMethods.isSome | isSome} or
+ * {@link OptionMethods.isNone | isNone} properties to safely extract the value
+ * from {@link Some} while always accounting for {@link None}.
  *
  * ```ts
  * const divide = (numerator: number, denominator: number): Option<number> =>
@@ -30,8 +31,9 @@
  *
  * ### Method overview
  *
- * In addition to working with pattern matching, {@link Option} provides a
- * variety of different methods.
+ * In addition to providing the {@link OptionMethods.isSome | isSome} and
+ * {@link OptionMethods.isNone | isNone} properties for discriminating
+ * {@link Option}s, the {@link Option} classes provide several utility methods.
  *
  * #### Extracting the contained value
  *
@@ -59,7 +61,7 @@
  *   contained value satisfies the predicate, or else it returns {@link None}.
  *
  * @example
- * Basic pattern matching on an {@link Option}:
+ * Discriminating an {@link Option}:
  *
  * ```ts
  * const message: Option<string> = Math.random() < 0.5 ? some("howdy") : none;
@@ -125,15 +127,15 @@ interface OptionMethods<out A> {
    * {@link Option} is {@link Some}, and it's `false` when the {@link Option} is
    * {@link None}.
    *
-   * @category Discriminating the option
+   * @category Discriminating an option
    *
    * @example
-   * The {@link OptionMethods.isSome | isSome} property is used for pattern
-   * matching on an {@link Option}:
+   * The {@link OptionMethods.isSome | isSome} property is used for
+   * discriminating an {@link Option}:
    *
    * ```ts
    * const getMessage = (): Option<string> =>
-   *   Math.random() < 0.5 < some("Hello World!") : none;
+   *   Math.random() < 0.5 ? some("Hello World!") : none;
    *
    * const message = getMessage();
    *
@@ -342,7 +344,8 @@ interface OptionMethods<out A> {
    * const getMessage = (): Option<string> =>
    *   Math.random() < 0.5 ? some("Hello World!") : none;
    *
-   * const message = getMessage().unsafeExtract("message should not be random");
+   * const message = getMessage()
+   *   .unsafeExtract("message should not be random");
    *
    * console.log(message);
    * ```
