@@ -477,44 +477,5 @@ const some = <A>(value: A): Some<A> => new Some(value);
  */
 const none = new None<never>();
 
-/**
- * Converts the `predicate` into an isomorphic {@link Option} predicate.
- *
- * @remarks
- * {@link Option} predicates are smarter than regular predicates. A regular
- * predicate can only tell whether or not a value satisfies a certain condition.
- * However, {@link Option} predicates can also provide a proof of a value
- * satisfying the condition.
- *
- * @example
- * ```
- * interface Person {
- *   name: string;
- *   age: number;
- * }
- *
- * const michael: Person = { name: "Michael Jackson", age: 50 };
- *
- * const getPerson = (): Option<Person> =>
- *   Math.random() < 0.5 ? some(michael) : none;
- *
- * const isAdult = (person: Person): boolean => person.age >= 18;
- *
- * const adult = getPerson().flatMap(optionPredicate(isAdult));
- *
- * if (adult.some) {
- *   console.log(`${adult.value.name} is an adult`);
- * }
- * ```
- *
- * @typeParam A - The type of the input value of `predicate`.
- * @param predicate - The predicate to convert into an {@link Option} predicate.
- * @returns An {@link Option} predicate that's isomorphic to `predicate`.
- */
-const optionPredicate =
-  <A>(predicate: (value: A) => boolean) =>
-  (value: A): Option<A> =>
-    predicate(value) ? new Some(value) : none;
-
 export type { OptionMethods, Some, None, Option };
-export { OptionExtractError, some, none, optionPredicate };
+export { OptionExtractError, some, none };

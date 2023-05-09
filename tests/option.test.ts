@@ -1,12 +1,7 @@
 import fc from "fast-check";
 import { describe, it, expect } from "@jest/globals";
 import type { Some, None, Option } from "../src/option.js";
-import {
-  OptionExtractError,
-  some,
-  none,
-  optionPredicate,
-} from "../src/option.js";
+import { OptionExtractError, some, none } from "../src/option.js";
 
 const genSome = <A>(genValue: fc.Arbitrary<A>): fc.Arbitrary<Some<A>> =>
   genValue.map((value) => some(value));
@@ -177,23 +172,6 @@ describe("option", () => {
             new OptionExtractError(m)
           );
         })
-      );
-    });
-  });
-
-  describe("optionPredicate", () => {
-    it("should commute with flatMap", () => {
-      expect.assertions(100);
-      fc.assert(
-        fc.property(
-          fc.anything(),
-          fc.func(fc.boolean()),
-          <A>(a: A, p: (a: A) => boolean) => {
-            expect(some(a).flatMap(optionPredicate(p)).some).toStrictEqual(
-              p(a)
-            );
-          }
-        )
       );
     });
   });
