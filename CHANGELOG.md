@@ -1,3 +1,9 @@
+# [v1.2.0](https://github.com/meteoric-framework/core/compare/v1.1.0...v1.2.0) (2023-05-09)
+
+## ✨ New Features
+
+- [`d4541b1`](https://github.com/meteoric-framework/core/commit/d4541b1) Added the &#x60;filter&#x60; method for &#x60;Option&#x60; values
+
 # [v1.1.0](https://github.com/meteoric-framework/core/compare/v1.0.0...v1.1.0) (2023-05-08)
 
 ## ✨ New Features
