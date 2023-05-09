@@ -37,5 +37,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: docs
-          branch: gh-pages
-          commit-message: ":rocket: Deploy docs to gh-pages"
+          branch: docs
+          commit-message: ":rocket: Deploy docs"
