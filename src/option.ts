@@ -21,7 +21,7 @@
  *
  * const result = divide(2, 3);
  *
- * if (result.some) {
+ * if (result.isSome) {
  *   console.log(`Result: ${result.value}`);
  * } else {
  *   console.log("Cannot divide by 0");
@@ -64,7 +64,7 @@
  * ```ts
  * const message: Option<string> = Math.random() < 0.5 ? some("howdy") : none;
  *
- * if (message.some) {
+ * if (message.isSome) {
  *   console.log(message.value);
  * }
  *
@@ -102,7 +102,7 @@
  *   }
  * }
  *
- * if (nameOfBiggestAnimal.some) {
+ * if (nameOfBiggestAnimal.isSome) {
  *   console.log(`The biggest animal is ${nameOfBiggestAnimal.value}`);
  * } else {
  *   console.log("There are no animals :(");
@@ -121,15 +121,15 @@ type Option<A> = Some<A> | None<A>;
  */
 interface OptionMethods<out A> {
   /**
-   * The value of {@link OptionMethods.some | some} is `true` when the
+   * The value of {@link OptionMethods.isSome | isSome} is `true` when the
    * {@link Option} is {@link Some}, and it's `false` when the {@link Option} is
    * {@link None}.
    *
    * @category Discriminating the option
    *
    * @example
-   * The {@link OptionMethods.some | some} property is used for pattern matching
-   * on an {@link Option}:
+   * The {@link OptionMethods.isSome | isSome} property is used for pattern
+   * matching on an {@link Option}:
    *
    * ```ts
    * const getMessage = (): Option<string> =>
@@ -137,14 +137,14 @@ interface OptionMethods<out A> {
    *
    * const message = getMessage();
    *
-   * if (message.some) {
+   * if (message.isSome) {
    *   console.log(message.value);
    * } else {
    *   console.log("Did not receive a message");
    * }
    * ```
    */
-  readonly some: boolean;
+  readonly isSome: boolean;
 
   /**
    * Returns {@link None} if the {@link Option} is {@link None}. Otherwise,
@@ -162,7 +162,7 @@ interface OptionMethods<out A> {
    *
    * const length = getMessage().map((string) => string.length);
    *
-   * if (length.some) {
+   * if (length.isSome) {
    *   console.log(`The length of the message is ${length.value}`);
    * } else {
    *   console.log("Did not receive a message");
@@ -198,7 +198,7 @@ interface OptionMethods<out A> {
    *
    * const element = get2d(matrix, 1, 1);
    *
-   * if (element.some) {
+   * if (element.isSome) {
    *   console.log(`The element at position (1, 1) is ${element.value}`);
    * } else {
    *   console.log("There's no element at position (1, 1)");
@@ -230,7 +230,7 @@ interface OptionMethods<out A> {
    *
    * const number = some(random(10)).filter(isOdd).filter(isSquare);
    *
-   * if (number.some) {
+   * if (number.isSome) {
    *   console.log(`${number.value} is an odd square`);
    * } else {
    *   console.log("Did not see an odd square");
@@ -338,7 +338,7 @@ interface OptionMethods<out A> {
  * @typeParam A - The type of the value in the {@link Some}.
  */
 class Some<out A> implements OptionMethods<A> {
-  public readonly some: true;
+  public readonly isSome: true;
 
   /**
    * Constructs a new {@link Some} with the provided `value`.
@@ -348,7 +348,7 @@ class Some<out A> implements OptionMethods<A> {
    * @returns A new {@link Some} containing the provided `value`.
    */
   public constructor(public readonly value: A) {
-    this.some = true;
+    this.isSome = true;
   }
 
   public map<B>(morphism: (value: A) => B): Some<B> {
@@ -385,7 +385,7 @@ class Some<out A> implements OptionMethods<A> {
  * @typeParam A - The type of the value in the {@link None}.
  */
 class None<out A> implements OptionMethods<A> {
-  public readonly some: false;
+  public readonly isSome: false;
 
   /**
    * Constructs a new {@link None} with the provided phantom type `A`.
@@ -394,7 +394,7 @@ class None<out A> implements OptionMethods<A> {
    * @returns A new {@link None} with the provided phantom type `A`.
    */
   public constructor() {
-    this.some = false;
+    this.isSome = false;
   }
 
   public map<B>(): None<B> {
