@@ -33,7 +33,8 @@
  *
  * In addition to providing the {@link OptionMethods.isSome | isSome} and
  * {@link OptionMethods.isNone | isNone} properties for discriminating
- * {@link Option}s, the {@link Option} classes provide several utility methods.
+ * {@link Option}s, the {@link OptionMethods} class provides several utility
+ * methods.
  *
  * #### Extracting the contained value
  *
@@ -52,9 +53,8 @@
  * These methods transform the {@link Some} variant, and return {@link None}
  * values unchanged:
  *
- * - {@link OptionMethods.map | map} applies the provided function to the
- *   contained value of {@link Some} and puts the result in a new {@link Some}
- *   value.
+ * - {@link OptionMethods.map | map} applies the provided function to the value
+ *   contained in {@link Some} and puts the result in a new {@link Some}.
  * - {@link OptionMethods.flatMap | flatMap} returns the {@link Option} obtained
  *   by applying the provided function to the contained value of {@link Some}.
  * - {@link OptionMethods.filter | filter} returns the input {@link Some} if the
