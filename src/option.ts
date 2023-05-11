@@ -113,15 +113,13 @@
  *
  * @typeParam A - The type to make optional.
  */
-type Option<A> = Some<A> | None<A>;
+type Option<A> = Some<A> | None;
 
 /**
- * The {@link OptionMethods} interface lists all the methods implemented by
+ * The {@link OptionMethods} abstract class lists all the methods implemented by
  * {@link Option}.
- *
- * @typeParam A - The type of the value in the {@link Option}.
  */
-interface OptionMethods<out A> {
+abstract class OptionMethods {
   /**
    * The value of {@link OptionMethods.isSome | isSome} is `true` when the
    * {@link Option} is {@link Some}, and it's `false` when the {@link Option} is
@@ -146,7 +144,7 @@ interface OptionMethods<out A> {
    * }
    * ```
    */
-  readonly isSome: boolean;
+  public abstract readonly isSome: boolean;
 
   /**
    * The value of {@link OptionMethods.isNone | isNone} is `true` when the
@@ -172,7 +170,7 @@ interface OptionMethods<out A> {
    * }
    * ```
    */
-  readonly isNone: boolean;
+  public abstract readonly isNone: boolean;
 
   /**
    * Returns {@link None} if the {@link Option} is {@link None}. Otherwise,
@@ -197,11 +195,15 @@ interface OptionMethods<out A> {
    * }
    * ```
    *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
    * @typeParam B - The type of the resultant {@link Option}'s value.
+   * @param this - The input {@link Option}.
    * @param morphism - The function to transform the {@link Option}'s value.
    * @returns A new {@link Option} containing the transformed value.
    */
-  readonly map: <B>(morphism: (value: A) => B) => Option<B>;
+  public map<A, B>(this: Option<A>, morphism: (value: A) => B): Option<B> {
+    return this.isSome ? new Some(morphism(this.value)) : none;
+  }
 
   /**
    * Returns {@link None} if the {@link Option} is {@link None}. Otherwise,
@@ -233,12 +235,19 @@ interface OptionMethods<out A> {
    * }
    * ```
    *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
    * @typeParam B - The type of the resultant {@link Option}'s value.
+   * @param this - The input {@link Option}.
    * @param arrow - The function to transform the {@link Option}'s value.
    * @returns The result of applying `arrow` to the contained value, or
    * {@link None}.
    */
-  readonly flatMap: <B>(arrow: (value: A) => Option<B>) => Option<B>;
+  public flatMap<A, B>(
+    this: Option<A>,
+    arrow: (value: A) => Option<B>
+  ): Option<B> {
+    return this.isSome ? arrow(this.value) : none;
+  }
 
   /**
    * Returns {@link None} if the {@link Option} is {@link None} or if the
@@ -265,11 +274,18 @@ interface OptionMethods<out A> {
    * }
    * ```
    *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
    * @param predicate - The function to test the {@link Option}'s value.
    * @returns A input {@link Some} if the contained value passed the `predicate`
    * check, or {@link None}.
    */
-  readonly filter: (predicate: (value: A) => boolean) => Option<A>;
+  public filter<A>(
+    this: Option<A>,
+    predicate: (value: A) => boolean
+  ): Option<A> {
+    return this.isSome && predicate(this.value) ? this : none;
+  }
 
   /**
    * Returns the contained {@link Some} value, or `defaultValue` when
@@ -292,12 +308,15 @@ interface OptionMethods<out A> {
    * console.log(message);
    * ```
    *
-   * @typeParam B - The type of `defaultValue`. It must be a subtype of `A`.
-   * @param defaultValue - The value to return when the {@link Option} is
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param defaultValue - The value to return when the input {@link Option} is
    * {@link None}.
    * @returns The contained {@link Some} value, or `defaultValue`.
    */
-  readonly safeExtract: <B extends A>(defaultValue: B) => A;
+  public safeExtract<A>(this: Option<A>, defaultValue: A): A {
+    return this.isSome ? this.value : defaultValue;
+  }
 
   /**
    * Returns the contained {@link Some} value, or the result of applying
@@ -318,14 +337,16 @@ interface OptionMethods<out A> {
    * console.log(message);
    * ```
    *
-   * @typeParam B - The type of the result of `getDefaultValue`. It must be a
-   * subtype of `A`.
-   * @param getDefaultValue - The thunk to evaluate and return when the
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param getDefaultValue - The thunk to evaluate and return when the input
    * {@link Option} is {@link None}.
    * @returns The contained {@link Some} value, or the result of applying
    * `getDefaultValue`.
    */
-  readonly safeExtractThunk: <B extends A>(getDefaultValue: () => B) => A;
+  public safeExtractThunk<A>(this: Option<A>, getDefaultValue: () => A): A {
+    return this.isSome ? this.value : getDefaultValue();
+  }
 
   /**
    * Returns the contained {@link Some} value, or throws an
@@ -351,11 +372,16 @@ interface OptionMethods<out A> {
    * ```
    *
    * @throws An {@link OptionExtractError} when extracting from {@link None}.
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
    * @param message - A descriptive error message to display when trying to
    * extract from {@link None}.
    * @returns The contained {@link Some} value.
    */
-  readonly unsafeExtract: (message: string) => A;
+  public unsafeExtract<A>(this: Option<A>, message: string): A {
+    if (this.isSome) return this.value;
+    throw new OptionExtractError(message);
+  }
 }
 
 /**
@@ -366,10 +392,10 @@ interface OptionMethods<out A> {
  *
  * @typeParam A - The type of the value in the {@link Some}.
  */
-class Some<out A> implements OptionMethods<A> {
-  public readonly isSome: true;
+class Some<out A> extends OptionMethods {
+  public override readonly isSome = true;
 
-  public readonly isNone: false;
+  public override readonly isNone = false;
 
   /**
    * Constructs a new {@link Some} with the provided `value`.
@@ -379,32 +405,7 @@ class Some<out A> implements OptionMethods<A> {
    * @returns A new {@link Some} containing the provided `value`.
    */
   public constructor(public readonly value: A) {
-    this.isSome = true;
-    this.isNone = false;
-  }
-
-  public map<B>(morphism: (value: A) => B): Some<B> {
-    return new Some(morphism(this.value));
-  }
-
-  public flatMap<B>(arrow: (value: A) => Option<B>): Option<B> {
-    return arrow(this.value);
-  }
-
-  public filter(predicate: (value: A) => boolean): Option<A> {
-    return predicate(this.value) ? this : none;
-  }
-
-  public safeExtract(): A {
-    return this.value;
-  }
-
-  public safeExtractThunk(): A {
-    return this.value;
-  }
-
-  public unsafeExtract(): A {
-    return this.value;
+    super();
   }
 }
 
@@ -413,53 +414,16 @@ class Some<out A> implements OptionMethods<A> {
  * value.
  *
  * @group Option Classes
- *
- * @typeParam A - The type of the value in the {@link None}.
  */
-class None<out A> implements OptionMethods<A> {
-  public readonly isSome: false;
+class None extends OptionMethods {
+  public override readonly isSome = false;
 
-  public readonly isNone: true;
-
-  /**
-   * Constructs a new {@link None} with the provided phantom type `A`.
-   *
-   * @typeParam A - The type of the non-existent value.
-   * @returns A new {@link None} with the provided phantom type `A`.
-   */
-  public constructor() {
-    this.isSome = false;
-    this.isNone = true;
-  }
-
-  public map<B>(): None<B> {
-    return none;
-  }
-
-  public flatMap<B>(): None<B> {
-    return none;
-  }
-
-  public filter(): this {
-    return this;
-  }
-
-  public safeExtract<B extends A>(defaultValue: B): A {
-    return defaultValue;
-  }
-
-  public safeExtractThunk<B extends A>(getDefaultValue: () => B): A {
-    return getDefaultValue();
-  }
-
-  public unsafeExtract(message: string): A {
-    throw new OptionExtractError(message);
-  }
+  public override readonly isNone = true;
 }
 
 /**
  * An {@link OptionExtractError} is thrown when you call the
- * {@link None.unsafeExtract | unsafeExtract} method of {@link None}.
+ * {@link OptionMethods.unsafeExtract | unsafeExtract} method of {@link None}.
  *
  * @group Errors
  */
@@ -468,7 +432,7 @@ class OptionExtractError extends Error {
    * Constructs a new {@link OptionExtractError} object with the provided
    * message. You shouldn't need to create an {@link OptionExtractError}
    * manually. It will be automatically created when you call the
-   * {@link None.unsafeExtract | unsafeExtract} method of {@link None}.
+   * {@link OptionMethods.unsafeExtract | unsafeExtract} method of {@link None}.
    *
    * @param message - A descriptive error message.
    * @returns A new {@link OptionExtractError} object.
@@ -505,12 +469,8 @@ const some = <A>(value: A): Some<A> => new Some(value);
  * The singleton {@link None} instance.
  *
  * @group Option Constructors
- *
- * @remarks
- * The type of the contained value is set to `never`. Hence, it can be assigned
- * to an {@link Option} of any type.
  */
-const none = new None<never>();
+const none = new None();
 
 export type { OptionMethods, Some, None, Option };
 export { OptionExtractError, some, none };

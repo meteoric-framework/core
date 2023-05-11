@@ -6,10 +6,10 @@ import { OptionExtractError, some, none } from "../src/option.js";
 const genSome = <A>(genValue: fc.Arbitrary<A>): fc.Arbitrary<Some<A>> =>
   genValue.map((value) => some(value));
 
-const genNone = <A>(): fc.Arbitrary<None<A>> => fc.constant(none);
+const genNone: fc.Arbitrary<None> = fc.constant(none);
 
 const genOption = <A>(genValue: fc.Arbitrary<A>): fc.Arbitrary<Option<A>> =>
-  fc.oneof(genSome(genValue), genNone<A>());
+  fc.oneof(genSome(genValue), genNone);
 
 describe("option", () => {
   describe("map", () => {
@@ -107,8 +107,8 @@ describe("option", () => {
     it("should extract the value from some", () => {
       expect.assertions(100);
       fc.assert(
-        fc.property(fc.anything(), <A>(a: A) => {
-          expect(some(a).safeExtract()).toStrictEqual(a);
+        fc.property(fc.anything(), fc.anything(), <A>(a: A, b: A) => {
+          expect(some(a).safeExtract(b)).toStrictEqual(a);
         })
       );
     });
@@ -128,9 +128,13 @@ describe("option", () => {
     it("should extract the value from some", () => {
       expect.assertions(100);
       fc.assert(
-        fc.property(fc.anything(), <A>(a: A) => {
-          expect(some(a).safeExtractThunk()).toStrictEqual(a);
-        })
+        fc.property(
+          fc.anything(),
+          fc.func(fc.anything()),
+          <A>(a: A, f: () => A) => {
+            expect(some(a).safeExtractThunk(f)).toStrictEqual(a);
+          }
+        )
       );
     });
 
@@ -149,8 +153,8 @@ describe("option", () => {
     it("should extract the value from some", () => {
       expect.assertions(100);
       fc.assert(
-        fc.property(fc.anything(), <A>(a: A) => {
-          expect(some(a).unsafeExtract()).toStrictEqual(a);
+        fc.property(fc.anything(), fc.string(), <A>(a: A, m: string) => {
+          expect(some(a).unsafeExtract(m)).toStrictEqual(a);
         })
       );
     });
