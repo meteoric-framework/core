@@ -559,5 +559,5 @@ const some = <A>(value: A): Some<A> => new Some(value);
  */
 const none = new None();
 
-export type { OptionMethods, Some, None, Option };
+export type { Option, OptionMethods, Some, None };
 export { OptionExtractError, some, none };
