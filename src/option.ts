@@ -382,6 +382,93 @@ abstract class OptionMethods {
     if (this.isSome) return this.value;
     throw new OptionExtractError(message);
   }
+
+  /**
+   * Applies the `callback` to the input {@link Option}, and then returns the
+   * input {@link Option}.
+   *
+   * @category Tapping into the method chain
+   *
+   * @example
+   * ```ts
+   * const getMessage = (): Option<string> =>
+   *   Math.random() < 0.5 ? some("Hello World!") : none;
+   *
+   * const message = getMessage()
+   *   .tap((option) => console.log("Got an option", option))
+   *   .safeExtract("default message");
+   *
+   * console.log(message);
+   * ```
+   *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param callback - The function that taps the input {@link Option}.
+   * @returns - The input {@link Option}.
+   */
+  public tap<A>(
+    this: Option<A>,
+    callback: (option: Option<A>) => void
+  ): Option<A> {
+    callback(this);
+    return this;
+  }
+
+  /**
+   * Applies the callback to the contained {@link Some} value, and then returns
+   * the input {@link Option}.
+   *
+   * @category Tapping into the method chain
+   *
+   * @example
+   * ```ts
+   * const getMessage = (): Option<string> =>
+   *   Math.random() < 0.5 ? some("Hello World!") : none;
+   *
+   * const message = getMessage()
+   *   .tapSome((value) => console.log("Got some value:", value))
+   *   .safeExtract("default message");
+   *
+   * console.log(message);
+   * ```
+   *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param callback - The function that taps the contained {@link Some} value.
+   * @returns - The input {@link Option}.
+   */
+  public tapSome<A>(this: Option<A>, callback: (value: A) => void): Option<A> {
+    if (this.isSome) callback(this.value);
+    return this;
+  }
+
+  /**
+   * Calls the callback when the input {@link Option} is {@link None}, and then
+   * returns the input {@link Option}.
+   *
+   * @category Tapping into the method chain
+   *
+   * @example
+   * ```ts
+   * const getMessage = (): Option<string> =>
+   *   Math.random() < 0.5 ? some("Hello World!") : none;
+   *
+   * const message = getMessage()
+   *   .tap(() => console.log("Got no value"))
+   *   .safeExtract("default message");
+   *
+   * console.log(message);
+   * ```
+   *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param callback - The function that taps the {@link None} case.
+   * @returns - The input {@link Option}.
+   */
+  public tapNone<A>(this: Option<A>, callback: () => void): Option<A> {
+    if (this.isNone) callback();
+    return this;
+  }
 }
 
 /**

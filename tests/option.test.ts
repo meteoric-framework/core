@@ -1,5 +1,5 @@
 import fc from "fast-check";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect, jest } from "@jest/globals";
 import type { Some, None, Option } from "../src/option.js";
 import { OptionExtractError, some, none } from "../src/option.js";
 
@@ -175,6 +175,45 @@ describe("option", () => {
           expect(() => none.unsafeExtract(m)).toThrow(
             new OptionExtractError(m)
           );
+        })
+      );
+    });
+  });
+
+  describe("tap", () => {
+    it("should apply the callback to the input option", () => {
+      expect.assertions(100);
+      fc.assert(
+        fc.property(genOption(fc.anything()), <A>(m: Option<A>) => {
+          const callback = jest.fn<(m: Option<A>) => void>();
+          m.tap(callback);
+          expect(callback).toHaveBeenCalledWith(m);
+        })
+      );
+    });
+  });
+
+  describe("tapSome", () => {
+    it("should apply the callback to the contained value", () => {
+      expect.assertions(100);
+      fc.assert(
+        fc.property(genSome(fc.anything()), <A>(m: Some<A>) => {
+          const callback = jest.fn<(a: A) => void>();
+          m.tapSome(callback);
+          expect(callback).toHaveBeenCalledWith(m.value);
+        })
+      );
+    });
+  });
+
+  describe("tapNone", () => {
+    it("should call the callback function", () => {
+      expect.assertions(100);
+      fc.assert(
+        fc.property(genNone, (m: None) => {
+          const callback = jest.fn<() => void>();
+          m.tapNone(callback);
+          expect(callback).toHaveBeenCalledWith();
         })
       );
     });
