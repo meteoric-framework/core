@@ -51,6 +51,17 @@ import { success, failure } from "./result.js";
  * - {@link OptionMethods.unsafeExtract | unsafeExtract} throws an
  *   {@link OptionExtractError} with the provided custom message.
  *
+ * #### Converting to a result
+ *
+ * These methods transform {@link Option} to {@link Result}:
+ *
+ * - {@link OptionMethods.toResult | toResult} transforms {@link Some} to
+ *   {@link Success} with the same value, and {@link None} to {@link Failure}
+ *   with the provided error value.
+ * - {@link OptionMethods.toResultFrom | toResultFrom} transforms {@link Some}
+ *   to {@link Success} with the same value, and {@link None} to {@link Failure}
+ *   with the error returned by the provided function.
+ *
  * #### Transforming contained values
  *
  * These methods transform the {@link Some} variant, and return {@link None}
