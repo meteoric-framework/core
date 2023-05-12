@@ -2,6 +2,7 @@ import fc from "fast-check";
 import { describe, it, expect, jest } from "@jest/globals";
 import type { Some, None, Option } from "../src/option.js";
 import { OptionExtractError, some, none } from "../src/option.js";
+import { success, failure } from "../src/result.js";
 
 const id = <A>(a: A): A => a;
 
@@ -217,6 +218,54 @@ describe("option", () => {
           m.ifEmpty(callback);
           expect(callback).toHaveBeenCalledWith();
         })
+      );
+    });
+  });
+
+  describe("toResult", () => {
+    it("should convert some to success", () => {
+      expect.assertions(100);
+      fc.assert(
+        fc.property(fc.anything(), fc.anything(), <A, B>(a: A, b: B) => {
+          expect(some(a).toResult(b)).toStrictEqual(success(a));
+        })
+      );
+    });
+
+    it("should convert none to failure", () => {
+      expect.assertions(100);
+      fc.assert(
+        fc.property(genNone, fc.anything(), <A>(m: None, a: A) => {
+          expect(m.toResult(a)).toStrictEqual(failure(a));
+        })
+      );
+    });
+  });
+
+  describe("toResultFrom", () => {
+    it("should convert some to success", () => {
+      expect.assertions(100);
+      fc.assert(
+        fc.property(
+          fc.anything(),
+          fc.func(fc.anything()),
+          <A, B>(a: A, f: () => B) => {
+            expect(some(a).toResultFrom(f)).toStrictEqual(success(a));
+          }
+        )
+      );
+    });
+
+    it("should convert none to failure", () => {
+      expect.assertions(100);
+      fc.assert(
+        fc.property(
+          genNone,
+          fc.func(fc.anything()),
+          <A>(m: None, f: () => A) => {
+            expect(m.toResultFrom(f)).toStrictEqual(failure(f()));
+          }
+        )
       );
     });
   });

@@ -1,3 +1,6 @@
+import type { Result, Success, Failure } from "./result.js";
+import { success, failure } from "./result.js";
+
 /**
  * Type {@link Option} represents an optional value. Every {@link Option} is
  * either {@link Some} and contains a value, or {@link None} and doesn't contain
@@ -468,6 +471,77 @@ abstract class OptionMethods {
   public ifEmpty<A>(this: Option<A>, callback: () => void): Option<A> {
     if (this.isNone) callback();
     return this;
+  }
+
+  /**
+   * Returns a {@link Failure} containing `error` if the input {@link Option} is
+   * {@link None}. Otherwise, returns a {@link Success} containing the value
+   * contained in the input {@link Some}.
+   *
+   * @category Converting to a result
+   *
+   * @example
+   * ```ts
+   * const getAnswer = (): Option<number> =>
+   *   Math.random() < 0.5 ? some(42) : none;
+   *
+   * const answer = getAnswer().toResult("No answer to life");
+   *
+   * if (answer.isSuccess) {
+   *   console.log(`The answer to life is ${answer.value}`);
+   * } else {
+   *   console.log(answer.error);
+   * }
+   * ```
+   *
+   * @typeParam E - The type of `error`.
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param error - The error to wrap in a {@link Failure}.
+   * @returns A {@link Success} containing the input {@link Some} value, or a
+   * {@link Failure} containing the `error`.
+   */
+  public toResult<E, A>(this: Option<A>, error: E): Result<E, A> {
+    return this.isSome
+      ? (success(this.value) satisfies Success<A>)
+      : (failure(error) satisfies Failure<E>);
+  }
+
+  /**
+   * Returns a {@link Failure}, containing the error returned by `getError`, if
+   * the input {@link Option} is {@link None}. Otherwise, returns a
+   * {@link Success} containing the value contained in the input {@link Some}.
+   *
+   * @category Converting to a result
+   *
+   * @example
+   * ```ts
+   * const getAnswer = (): Option<number> =>
+   *   Math.random() < 0.5 ? some(42) : none;
+   *
+   * const answer = getAnswer().toResultFrom(() => {
+   *   const time = new Date().toLocaleTimeString();
+   *   return `[${time}] No answer to life`;
+   * });
+   *
+   * if (answer.isSuccess) {
+   *   console.log(`The answer to life is ${answer.value}`);
+   * } else {
+   *   console.log(answer.error);
+   * }
+   * ```
+   *
+   * @typeParam E - The return type of `getError`.
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param getError - The thunk returning the error to wrap in {@link Failure}.
+   * @returns A {@link Success} containing the input {@link Some} value, or a
+   * {@link Failure} containing the error returned by `getError`.
+   */
+  public toResultFrom<E, A>(this: Option<A>, getError: () => E): Result<E, A> {
+    return this.isSome
+      ? (success(this.value) satisfies Success<A>)
+      : (failure(getError()) satisfies Failure<E>);
   }
 }
 
