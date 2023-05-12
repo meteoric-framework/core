@@ -454,7 +454,7 @@ abstract class OptionMethods {
    *   Math.random() < 0.5 ? some("Hello World!") : none;
    *
    * const message = getMessage()
-   *   .tap(() => console.log("Got no value"))
+   *   .tapNone(() => console.log("Got no value"))
    *   .safeExtract("default message");
    *
    * console.log(message);
