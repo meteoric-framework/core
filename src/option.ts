@@ -426,7 +426,7 @@ abstract class OptionMethods {
    *   Math.random() < 0.5 ? some("Hello World!") : none;
    *
    * const message = getMessage()
-   *   .tapSome((value) => console.log("Got some value:", value))
+   *   .forEach((value) => console.log("Got some value:", value))
    *   .safeExtract("default message");
    *
    * console.log(message);
@@ -437,7 +437,7 @@ abstract class OptionMethods {
    * @param callback - The function that taps the contained {@link Some} value.
    * @returns - The input {@link Option}.
    */
-  public tapSome<A>(this: Option<A>, callback: (value: A) => void): Option<A> {
+  public forEach<A>(this: Option<A>, callback: (value: A) => void): Option<A> {
     if (this.isSome) callback(this.value);
     return this;
   }

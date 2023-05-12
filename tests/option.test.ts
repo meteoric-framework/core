@@ -195,13 +195,13 @@ describe("option", () => {
     });
   });
 
-  describe("tapSome", () => {
+  describe("forEach", () => {
     it("should apply the callback to the contained value", () => {
       expect.assertions(100);
       fc.assert(
         fc.property(genSome(fc.anything()), <A>(m: Some<A>) => {
           const callback = jest.fn<(a: A) => void>();
-          m.tapSome(callback);
+          m.forEach(callback);
           expect(callback).toHaveBeenCalledWith(m.value);
         })
       );

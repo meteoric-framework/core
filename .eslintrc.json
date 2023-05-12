@@ -15,7 +15,8 @@
     "es2022": true
   },
   "rules": {
-    "unicorn/no-array-callback-reference": "off"
+    "unicorn/no-array-callback-reference": "off",
+    "unicorn/no-array-for-each": "off"
   },
   "overrides": [
     {
