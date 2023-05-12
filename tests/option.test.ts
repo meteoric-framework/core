@@ -3,8 +3,10 @@ import { describe, it, expect, jest } from "@jest/globals";
 import type { Some, None, Option } from "../src/option.js";
 import { OptionExtractError, some, none } from "../src/option.js";
 
+const id = <A>(a: A): A => a;
+
 const genSome = <A>(genValue: fc.Arbitrary<A>): fc.Arbitrary<Some<A>> =>
-  genValue.map((value) => some(value));
+  genValue.map(some);
 
 const genNone: fc.Arbitrary<None> = fc.constant(none);
 
@@ -17,7 +19,7 @@ describe("option", () => {
       expect.assertions(100);
       fc.assert(
         fc.property(genOption(fc.anything()), <A>(m: Option<A>) => {
-          expect(m.map((x) => x)).toStrictEqual(m);
+          expect(m.map(id)).toStrictEqual(m);
         })
       );
     });
@@ -31,7 +33,7 @@ describe("option", () => {
           fc.anything(),
           fc.func(genOption(fc.anything())),
           <A, B>(a: A, k: (a: A) => Option<B>) => {
-            expect(some(a).flatMap((x) => k(x))).toStrictEqual(k(a));
+            expect(some(a).flatMap(k)).toStrictEqual(k(a));
           }
         )
       );
@@ -41,7 +43,7 @@ describe("option", () => {
       expect.assertions(100);
       fc.assert(
         fc.property(genOption(fc.anything()), <A>(m: Option<A>) => {
-          expect(m.flatMap((x) => some(x))).toStrictEqual(m);
+          expect(m.flatMap(some)).toStrictEqual(m);
         })
       );
     });
@@ -58,8 +60,8 @@ describe("option", () => {
             k: (a: A) => Option<B>,
             h: (b: B) => Option<C>
           ) => {
-            expect(m.flatMap((x) => k(x).flatMap((y) => h(y)))).toStrictEqual(
-              m.flatMap((x) => k(x)).flatMap((y) => h(y))
+            expect(m.flatMap((x) => k(x).flatMap(h))).toStrictEqual(
+              m.flatMap(k).flatMap(h)
             );
           }
         )
@@ -76,7 +78,7 @@ describe("option", () => {
           fc.func(fc.boolean()),
           fc.func(fc.boolean()),
           <A>(m: Option<A>, p: (a: A) => boolean, q: (a: A) => boolean) => {
-            expect(m.filter((x) => p(x)).filter((x) => q(x))).toStrictEqual(
+            expect(m.filter(p).filter(q)).toStrictEqual(
               m.filter((x) => p(x) && q(x))
             );
           }
