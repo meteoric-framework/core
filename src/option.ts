@@ -454,7 +454,7 @@ abstract class OptionMethods {
    *   Math.random() < 0.5 ? some("Hello World!") : none;
    *
    * const message = getMessage()
-   *   .tapNone(() => console.log("Got no value"))
+   *   .ifEmpty(() => console.log("Got no value"))
    *   .safeExtract("default message");
    *
    * console.log(message);
@@ -465,7 +465,7 @@ abstract class OptionMethods {
    * @param callback - The function that taps the {@link None} case.
    * @returns - The input {@link Option}.
    */
-  public tapNone<A>(this: Option<A>, callback: () => void): Option<A> {
+  public ifEmpty<A>(this: Option<A>, callback: () => void): Option<A> {
     if (this.isNone) callback();
     return this;
   }

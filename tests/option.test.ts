@@ -208,13 +208,13 @@ describe("option", () => {
     });
   });
 
-  describe("tapNone", () => {
+  describe("ifEmpty", () => {
     it("should call the callback function", () => {
       expect.assertions(100);
       fc.assert(
         fc.property(genNone, (m: None) => {
           const callback = jest.fn<() => void>();
-          m.tapNone(callback);
+          m.ifEmpty(callback);
           expect(callback).toHaveBeenCalledWith();
         })
       );
