@@ -126,7 +126,7 @@ describe("option", () => {
     });
   });
 
-  describe("safeExtractThunk", () => {
+  describe("safeExtractFrom", () => {
     it("should extract the value from some", () => {
       expect.assertions(100);
       fc.assert(
@@ -134,7 +134,7 @@ describe("option", () => {
           fc.anything(),
           fc.func(fc.anything()),
           <A>(a: A, f: () => A) => {
-            expect(some(a).safeExtractThunk(f)).toStrictEqual(a);
+            expect(some(a).safeExtractFrom(f)).toStrictEqual(a);
           }
         )
       );
@@ -145,7 +145,7 @@ describe("option", () => {
       fc.assert(
         fc.property(fc.func(fc.anything()), <A>(f: () => A) => {
           const option: Option<A> = none;
-          expect(option.safeExtractThunk(f)).toStrictEqual(f());
+          expect(option.safeExtractFrom(f)).toStrictEqual(f());
         })
       );
     });

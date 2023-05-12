@@ -43,8 +43,8 @@
  *
  * - {@link OptionMethods.safeExtract | safeExtract} returns the provided
  *   default value.
- * - {@link OptionMethods.safeExtractThunk | safeExtractThunk} returns the
- *   result of evaluating the provided function.
+ * - {@link OptionMethods.safeExtractFrom | safeExtractFrom} returns the result
+ *   of evaluating the provided function.
  * - {@link OptionMethods.unsafeExtract | unsafeExtract} throws an
  *   {@link OptionExtractError} with the provided custom message.
  *
@@ -295,7 +295,7 @@ abstract class OptionMethods {
    *
    * @remarks
    * If an expensive computation is required to obtain `defaultValue` then use
-   * the {@link OptionMethods.safeExtractThunk | safeExtractThunk} method to
+   * the {@link OptionMethods.safeExtractFrom | safeExtractFrom} method to
    * lazily compute `defaultValue`.
    *
    * @example
@@ -329,7 +329,7 @@ abstract class OptionMethods {
    * const getMessage = (): Option<string> =>
    *   Math.random() < 0.5 ? some("Hello World!") : none;
    *
-   * const message = getMessage().safeExtractThunk(() => {
+   * const message = getMessage().safeExtractFrom(() => {
    *   const time = new Date().toLocaleTimeString();
    *   return `[${time}] default message`;
    * });
@@ -344,7 +344,7 @@ abstract class OptionMethods {
    * @returns The contained {@link Some} value, or the result of applying
    * `getDefaultValue`.
    */
-  public safeExtractThunk<A>(this: Option<A>, getDefaultValue: () => A): A {
+  public safeExtractFrom<A>(this: Option<A>, getDefaultValue: () => A): A {
     return this.isSome ? this.value : getDefaultValue();
   }
 
