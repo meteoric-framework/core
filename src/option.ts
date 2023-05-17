@@ -221,6 +221,37 @@ abstract class OptionMethods {
 
   /**
    * Returns {@link None} if the {@link Option} is {@link None}. Otherwise,
+   * returns a new {@link Some} containing `value`.
+   *
+   * @category Transforming contained values
+   *
+   * @example
+   * ```ts
+   * const getMessage = (): Option<string> =>
+   *   Math.random() < 0.5 ? some("Hello World!") : none;
+   *
+   * const answer = getMessage().replace(42);
+   *
+   * if (answer.isSome) {
+   *   console.log(`The answer is ${answer.value}`);
+   * } else {
+   *   console.log("There is no answer");
+   * }
+   * ```
+   *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @typeParam B - The type of `value`.
+   * @param this - The input {@link Option}.
+   * @param value - The value to replace the input {@link Some}'s value.
+   * @returns A new {@link Some} containing `value` if the input is {@link Some}
+   * or else {@link None}.
+   */
+  public replace<A, B>(this: Option<A>, value: B): Option<B> {
+    return this.isSome ? new Some(value) : none;
+  }
+
+  /**
+   * Returns {@link None} if the {@link Option} is {@link None}. Otherwise,
    * returns the result of applying `arrow` to the value contained in the
    * {@link Some}.
    *

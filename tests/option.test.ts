@@ -26,6 +26,21 @@ describe("option", () => {
     });
   });
 
+  describe("replace", () => {
+    it("should be equivalent to mapping a constant", () => {
+      expect.assertions(100);
+      fc.assert(
+        fc.property(
+          genOption(fc.anything()),
+          fc.anything(),
+          <A, B>(m: Option<A>, b: B) => {
+            expect(m.replace(b)).toStrictEqual(m.map(() => b));
+          }
+        )
+      );
+    });
+  });
+
   describe("flatMap", () => {
     it("should have a left identity", () => {
       expect.assertions(100);
