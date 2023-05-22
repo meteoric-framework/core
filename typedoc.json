@@ -1,5 +1,6 @@
 {
-  "entryPoints": ["src/index.ts"],
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
   "includeVersion": true,
   "sort": ["source-order"],
   "out": "docs"
