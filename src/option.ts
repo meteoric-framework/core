@@ -1,3 +1,6 @@
+import type { Result, Success, Failure } from "./result.js";
+import { success, failure } from "./result.js";
+
 /**
  * Type {@link Option} represents an optional value. Every {@link Option} is
  * either {@link Some} and contains a value, or {@link None} and doesn't contain
@@ -11,9 +14,10 @@
  * - Nullable values.
  *
  * @remarks
- * {@link Option}s are commonly paired with pattern matching to query the
- * presence of a value and take action, always accounting for the {@link None}
- * case.
+ * {@link Option}s are commonly discriminated by querying the
+ * {@link OptionMethods.isSome | isSome} or
+ * {@link OptionMethods.isNone | isNone} properties to safely extract the value
+ * from {@link Some} while always accounting for {@link None}.
  *
  * ```ts
  * const divide = (numerator: number, denominator: number): Option<number> =>
@@ -21,7 +25,7 @@
  *
  * const result = divide(2, 3);
  *
- * if (result.some) {
+ * if (result.isSome) {
  *   console.log(`Result: ${result.value}`);
  * } else {
  *   console.log("Cannot divide by 0");
@@ -30,8 +34,10 @@
  *
  * ### Method overview
  *
- * In addition to working with pattern matching, {@link Option} provides a
- * variety of different methods.
+ * In addition to providing the {@link OptionMethods.isSome | isSome} and
+ * {@link OptionMethods.isNone | isNone} properties for discriminating
+ * {@link Option}s, the {@link OptionMethods} class provides several utility
+ * methods.
  *
  * #### Extracting the contained value
  *
@@ -40,31 +46,41 @@
  *
  * - {@link OptionMethods.safeExtract | safeExtract} returns the provided
  *   default value.
- * - {@link OptionMethods.safeExtractThunk | safeExtractThunk} returns the
- *   result of evaluating the provided function.
+ * - {@link OptionMethods.safeExtractFrom | safeExtractFrom} returns the result
+ *   of evaluating the provided function.
  * - {@link OptionMethods.unsafeExtract | unsafeExtract} throws an
  *   {@link OptionExtractError} with the provided custom message.
+ *
+ * #### Converting to a result
+ *
+ * These methods transform {@link Option} to {@link Result}:
+ *
+ * - {@link OptionMethods.toResult | toResult} transforms {@link Some} to
+ *   {@link Success} with the same value, and {@link None} to {@link Failure}
+ *   with the provided error value.
+ * - {@link OptionMethods.toResultFrom | toResultFrom} transforms {@link Some}
+ *   to {@link Success} with the same value, and {@link None} to {@link Failure}
+ *   with the error returned by the provided function.
  *
  * #### Transforming contained values
  *
  * These methods transform the {@link Some} variant, and return {@link None}
  * values unchanged:
  *
- * - {@link OptionMethods.map | map} applies the provided function to the
- *   contained value of {@link Some} and puts the result in a new {@link Some}
- *   value.
+ * - {@link OptionMethods.map | map} applies the provided function to the value
+ *   contained in {@link Some} and puts the result in a new {@link Some}.
  * - {@link OptionMethods.flatMap | flatMap} returns the {@link Option} obtained
  *   by applying the provided function to the contained value of {@link Some}.
  * - {@link OptionMethods.filter | filter} returns the input {@link Some} if the
  *   contained value satisfies the predicate, or else it returns {@link None}.
  *
  * @example
- * Basic pattern matching on an {@link Option}:
+ * Discriminating an {@link Option}:
  *
  * ```ts
  * const message: Option<string> = Math.random() < 0.5 ? some("howdy") : none;
  *
- * if (message.some) {
+ * if (message.isSome) {
  *   console.log(message.value);
  * }
  *
@@ -102,7 +118,7 @@
  *   }
  * }
  *
- * if (nameOfBiggestAnimal.some) {
+ * if (nameOfBiggestAnimal.isSome) {
  *   console.log(`The biggest animal is ${nameOfBiggestAnimal.value}`);
  * } else {
  *   console.log("There are no animals :(");
@@ -111,40 +127,64 @@
  *
  * @typeParam A - The type to make optional.
  */
-type Option<A> = Some<A> | None<A>;
+type Option<A> = Some<A> | None;
 
 /**
- * The {@link OptionMethods} interface lists all the methods implemented by
+ * The {@link OptionMethods} abstract class lists all the methods implemented by
  * {@link Option}.
- *
- * @typeParam A - The type of the value in the {@link Option}.
  */
-interface OptionMethods<out A> {
+abstract class OptionMethods {
   /**
-   * The value of {@link OptionMethods.some | some} is `true` when the
+   * The value of {@link OptionMethods.isSome | isSome} is `true` when the
    * {@link Option} is {@link Some}, and it's `false` when the {@link Option} is
    * {@link None}.
    *
-   * @category Discriminating the option
+   * @category Discriminating an option
    *
    * @example
-   * The {@link OptionMethods.some | some} property is used for pattern matching
-   * on an {@link Option}:
+   * The {@link OptionMethods.isSome | isSome} property is used for
+   * discriminating an {@link Option}:
    *
    * ```ts
    * const getMessage = (): Option<string> =>
-   *   Math.random() < 0.5 < some("Hello World!") : none;
+   *   Math.random() < 0.5 ? some("Hello World!") : none;
    *
    * const message = getMessage();
    *
-   * if (message.some) {
+   * if (message.isSome) {
    *   console.log(message.value);
    * } else {
    *   console.log("Did not receive a message");
    * }
    * ```
    */
-  readonly some: boolean;
+  public abstract readonly isSome: boolean;
+
+  /**
+   * The value of {@link OptionMethods.isNone | isNone} is `true` when the
+   * {@link Option} is {@link None}, and it's `false` when the {@link Option} is
+   * {@link Some}.
+   *
+   * @category Discriminating an option
+   *
+   * @example
+   * The {@link OptionMethods.isNone | isNone} property is used for
+   * discriminating an {@link Option}:
+   *
+   * ```ts
+   * const getMessage = (): Option<string> =>
+   *   Math.random() < 0.5 ? some("Hello World!") : none;
+   *
+   * const message = getMessage();
+   *
+   * if (message.isNone) {
+   *   console.log("Did not receive a message");
+   * } else {
+   *   console.log(message.value);
+   * }
+   * ```
+   */
+  public abstract readonly isNone: boolean;
 
   /**
    * Returns {@link None} if the {@link Option} is {@link None}. Otherwise,
@@ -162,18 +202,53 @@ interface OptionMethods<out A> {
    *
    * const length = getMessage().map((string) => string.length);
    *
-   * if (length.some) {
+   * if (length.isSome) {
    *   console.log(`The length of the message is ${length.value}`);
    * } else {
    *   console.log("Did not receive a message");
    * }
    * ```
    *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
    * @typeParam B - The type of the resultant {@link Option}'s value.
+   * @param this - The input {@link Option}.
    * @param morphism - The function to transform the {@link Option}'s value.
    * @returns A new {@link Option} containing the transformed value.
    */
-  readonly map: <B>(morphism: (value: A) => B) => Option<B>;
+  public map<A, B>(this: Option<A>, morphism: (value: A) => B): Option<B> {
+    return this.isSome ? new Some(morphism(this.value)) : none;
+  }
+
+  /**
+   * Returns {@link None} if the {@link Option} is {@link None}. Otherwise,
+   * returns a new {@link Some} containing `value`.
+   *
+   * @category Transforming contained values
+   *
+   * @example
+   * ```ts
+   * const getMessage = (): Option<string> =>
+   *   Math.random() < 0.5 ? some("Hello World!") : none;
+   *
+   * const answer = getMessage().replace(42);
+   *
+   * if (answer.isSome) {
+   *   console.log(`The answer is ${answer.value}`);
+   * } else {
+   *   console.log("There is no answer");
+   * }
+   * ```
+   *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @typeParam B - The type of `value`.
+   * @param this - The input {@link Option}.
+   * @param value - The value to replace the input {@link Some}'s value.
+   * @returns A new {@link Some} containing `value` if the input is {@link Some}
+   * or else {@link None}.
+   */
+  public replace<A, B>(this: Option<A>, value: B): Option<B> {
+    return this.isSome ? new Some(value) : none;
+  }
 
   /**
    * Returns {@link None} if the {@link Option} is {@link None}. Otherwise,
@@ -198,19 +273,26 @@ interface OptionMethods<out A> {
    *
    * const element = get2d(matrix, 1, 1);
    *
-   * if (element.some) {
+   * if (element.isSome) {
    *   console.log(`The element at position (1, 1) is ${element.value}`);
    * } else {
    *   console.log("There's no element at position (1, 1)");
    * }
    * ```
    *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
    * @typeParam B - The type of the resultant {@link Option}'s value.
+   * @param this - The input {@link Option}.
    * @param arrow - The function to transform the {@link Option}'s value.
    * @returns The result of applying `arrow` to the contained value, or
    * {@link None}.
    */
-  readonly flatMap: <B>(arrow: (value: A) => Option<B>) => Option<B>;
+  public flatMap<A, B>(
+    this: Option<A>,
+    arrow: (value: A) => Option<B>
+  ): Option<B> {
+    return this.isSome ? arrow(this.value) : none;
+  }
 
   /**
    * Returns {@link None} if the {@link Option} is {@link None} or if the
@@ -230,18 +312,25 @@ interface OptionMethods<out A> {
    *
    * const number = some(random(10)).filter(isOdd).filter(isSquare);
    *
-   * if (number.some) {
+   * if (number.isSome) {
    *   console.log(`${number.value} is an odd square`);
    * } else {
    *   console.log("Did not see an odd square");
    * }
    * ```
    *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
    * @param predicate - The function to test the {@link Option}'s value.
    * @returns A input {@link Some} if the contained value passed the `predicate`
    * check, or {@link None}.
    */
-  readonly filter: (predicate: (value: A) => boolean) => Option<A>;
+  public filter<A>(
+    this: Option<A>,
+    predicate: (value: A) => boolean
+  ): Option<A> {
+    return this.isSome && predicate(this.value) ? this : none;
+  }
 
   /**
    * Returns the contained {@link Some} value, or `defaultValue` when
@@ -251,7 +340,7 @@ interface OptionMethods<out A> {
    *
    * @remarks
    * If an expensive computation is required to obtain `defaultValue` then use
-   * the {@link OptionMethods.safeExtractThunk | safeExtractThunk} method to
+   * the {@link OptionMethods.safeExtractFrom | safeExtractFrom} method to
    * lazily compute `defaultValue`.
    *
    * @example
@@ -264,12 +353,15 @@ interface OptionMethods<out A> {
    * console.log(message);
    * ```
    *
-   * @typeParam B - The type of `defaultValue`. It must be a subtype of `A`.
-   * @param defaultValue - The value to return when the {@link Option} is
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param defaultValue - The value to return when the input {@link Option} is
    * {@link None}.
    * @returns The contained {@link Some} value, or `defaultValue`.
    */
-  readonly safeExtract: <B extends A>(defaultValue: B) => A;
+  public safeExtract<A>(this: Option<A>, defaultValue: A): A {
+    return this.isSome ? this.value : defaultValue;
+  }
 
   /**
    * Returns the contained {@link Some} value, or the result of applying
@@ -282,7 +374,7 @@ interface OptionMethods<out A> {
    * const getMessage = (): Option<string> =>
    *   Math.random() < 0.5 ? some("Hello World!") : none;
    *
-   * const message = getMessage().safeExtractThunk(() => {
+   * const message = getMessage().safeExtractFrom(() => {
    *   const time = new Date().toLocaleTimeString();
    *   return `[${time}] default message`;
    * });
@@ -290,14 +382,16 @@ interface OptionMethods<out A> {
    * console.log(message);
    * ```
    *
-   * @typeParam B - The type of the result of `getDefaultValue`. It must be a
-   * subtype of `A`.
-   * @param getDefaultValue - The thunk to evaluate and return when the
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param getDefaultValue - The thunk to evaluate and return when the input
    * {@link Option} is {@link None}.
    * @returns The contained {@link Some} value, or the result of applying
    * `getDefaultValue`.
    */
-  readonly safeExtractThunk: <B extends A>(getDefaultValue: () => B) => A;
+  public safeExtractFrom<A>(this: Option<A>, getDefaultValue: () => A): A {
+    return this.isSome ? this.value : getDefaultValue();
+  }
 
   /**
    * Returns the contained {@link Some} value, or throws an
@@ -316,17 +410,181 @@ interface OptionMethods<out A> {
    * const getMessage = (): Option<string> =>
    *   Math.random() < 0.5 ? some("Hello World!") : none;
    *
-   * const message = getMessage().unsafeExtract("message should not be random");
+   * const message = getMessage()
+   *   .unsafeExtract("message should not be random");
    *
    * console.log(message);
    * ```
    *
    * @throws An {@link OptionExtractError} when extracting from {@link None}.
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
    * @param message - A descriptive error message to display when trying to
    * extract from {@link None}.
    * @returns The contained {@link Some} value.
    */
-  readonly unsafeExtract: (message: string) => A;
+  public unsafeExtract<A>(this: Option<A>, message: string): A {
+    if (this.isSome) return this.value;
+    throw new OptionExtractError(message);
+  }
+
+  /**
+   * Applies the `callback` to the input {@link Option}, and then returns the
+   * input {@link Option}.
+   *
+   * @category Tapping into the method chain
+   *
+   * @example
+   * ```ts
+   * const getMessage = (): Option<string> =>
+   *   Math.random() < 0.5 ? some("Hello World!") : none;
+   *
+   * const message = getMessage()
+   *   .tap((option) => console.log("Got an option", option))
+   *   .safeExtract("default message");
+   *
+   * console.log(message);
+   * ```
+   *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param callback - The function that taps the input {@link Option}.
+   * @returns - The input {@link Option}.
+   */
+  public tap<A>(
+    this: Option<A>,
+    callback: (option: Option<A>) => void
+  ): Option<A> {
+    callback(this);
+    return this;
+  }
+
+  /**
+   * Applies the callback to the contained {@link Some} value, and then returns
+   * the input {@link Option}.
+   *
+   * @category Tapping into the method chain
+   *
+   * @example
+   * ```ts
+   * const getMessage = (): Option<string> =>
+   *   Math.random() < 0.5 ? some("Hello World!") : none;
+   *
+   * const message = getMessage()
+   *   .forEach((value) => console.log("Got some value:", value))
+   *   .safeExtract("default message");
+   *
+   * console.log(message);
+   * ```
+   *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param callback - The function that taps the contained {@link Some} value.
+   * @returns - The input {@link Option}.
+   */
+  public forEach<A>(this: Option<A>, callback: (value: A) => void): Option<A> {
+    if (this.isSome) callback(this.value);
+    return this;
+  }
+
+  /**
+   * Calls the callback when the input {@link Option} is {@link None}, and then
+   * returns the input {@link Option}.
+   *
+   * @category Tapping into the method chain
+   *
+   * @example
+   * ```ts
+   * const getMessage = (): Option<string> =>
+   *   Math.random() < 0.5 ? some("Hello World!") : none;
+   *
+   * const message = getMessage()
+   *   .ifEmpty(() => console.log("Got no value"))
+   *   .safeExtract("default message");
+   *
+   * console.log(message);
+   * ```
+   *
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param callback - The function that taps the {@link None} case.
+   * @returns - The input {@link Option}.
+   */
+  public ifEmpty<A>(this: Option<A>, callback: () => void): Option<A> {
+    if (this.isNone) callback();
+    return this;
+  }
+
+  /**
+   * Returns a {@link Failure} containing `error` if the input {@link Option} is
+   * {@link None}. Otherwise, returns a {@link Success} containing the value
+   * contained in the input {@link Some}.
+   *
+   * @category Converting to a result
+   *
+   * @example
+   * ```ts
+   * const getAnswer = (): Option<number> =>
+   *   Math.random() < 0.5 ? some(42) : none;
+   *
+   * const answer = getAnswer().toResult("No answer to life");
+   *
+   * if (answer.isSuccess) {
+   *   console.log(`The answer to life is ${answer.value}`);
+   * } else {
+   *   console.log(answer.error);
+   * }
+   * ```
+   *
+   * @typeParam E - The type of `error`.
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param error - The error to wrap in a {@link Failure}.
+   * @returns A {@link Success} containing the input {@link Some} value, or a
+   * {@link Failure} containing the `error`.
+   */
+  public toResult<E, A>(this: Option<A>, error: E): Result<E, A> {
+    return this.isSome
+      ? (success(this.value) satisfies Success<A>)
+      : (failure(error) satisfies Failure<E>);
+  }
+
+  /**
+   * Returns a {@link Failure}, containing the error returned by `getError`, if
+   * the input {@link Option} is {@link None}. Otherwise, returns a
+   * {@link Success} containing the value contained in the input {@link Some}.
+   *
+   * @category Converting to a result
+   *
+   * @example
+   * ```ts
+   * const getAnswer = (): Option<number> =>
+   *   Math.random() < 0.5 ? some(42) : none;
+   *
+   * const answer = getAnswer().toResultFrom(() => {
+   *   const time = new Date().toLocaleTimeString();
+   *   return `[${time}] No answer to life`;
+   * });
+   *
+   * if (answer.isSuccess) {
+   *   console.log(`The answer to life is ${answer.value}`);
+   * } else {
+   *   console.log(answer.error);
+   * }
+   * ```
+   *
+   * @typeParam E - The return type of `getError`.
+   * @typeParam A - The type of the value contained in the input {@link Option}.
+   * @param this - The input {@link Option}.
+   * @param getError - The thunk returning the error to wrap in {@link Failure}.
+   * @returns A {@link Success} containing the input {@link Some} value, or a
+   * {@link Failure} containing the error returned by `getError`.
+   */
+  public toResultFrom<E, A>(this: Option<A>, getError: () => E): Result<E, A> {
+    return this.isSome
+      ? (success(this.value) satisfies Success<A>)
+      : (failure(getError()) satisfies Failure<E>);
+  }
 }
 
 /**
@@ -337,8 +595,10 @@ interface OptionMethods<out A> {
  *
  * @typeParam A - The type of the value in the {@link Some}.
  */
-class Some<out A> implements OptionMethods<A> {
-  public readonly some: true;
+class Some<out A> extends OptionMethods {
+  public override readonly isSome = true;
+
+  public override readonly isNone = false;
 
   /**
    * Constructs a new {@link Some} with the provided `value`.
@@ -348,31 +608,7 @@ class Some<out A> implements OptionMethods<A> {
    * @returns A new {@link Some} containing the provided `value`.
    */
   public constructor(public readonly value: A) {
-    this.some = true;
-  }
-
-  public map<B>(morphism: (value: A) => B): Some<B> {
-    return new Some(morphism(this.value));
-  }
-
-  public flatMap<B>(arrow: (value: A) => Option<B>): Option<B> {
-    return arrow(this.value);
-  }
-
-  public filter(predicate: (value: A) => boolean): Option<A> {
-    return predicate(this.value) ? this : none;
-  }
-
-  public safeExtract(): A {
-    return this.value;
-  }
-
-  public safeExtractThunk(): A {
-    return this.value;
-  }
-
-  public unsafeExtract(): A {
-    return this.value;
+    super();
   }
 }
 
@@ -381,50 +617,16 @@ class Some<out A> implements OptionMethods<A> {
  * value.
  *
  * @group Option Classes
- *
- * @typeParam A - The type of the value in the {@link None}.
  */
-class None<out A> implements OptionMethods<A> {
-  public readonly some: false;
+class None extends OptionMethods {
+  public override readonly isSome = false;
 
-  /**
-   * Constructs a new {@link None} with the provided phantom type `A`.
-   *
-   * @typeParam A - The type of the non-existent value.
-   * @returns A new {@link None} with the provided phantom type `A`.
-   */
-  public constructor() {
-    this.some = false;
-  }
-
-  public map<B>(): None<B> {
-    return none;
-  }
-
-  public flatMap<B>(): None<B> {
-    return none;
-  }
-
-  public filter(): this {
-    return this;
-  }
-
-  public safeExtract<B extends A>(defaultValue: B): A {
-    return defaultValue;
-  }
-
-  public safeExtractThunk<B extends A>(getDefaultValue: () => B): A {
-    return getDefaultValue();
-  }
-
-  public unsafeExtract(message: string): A {
-    throw new OptionExtractError(message);
-  }
+  public override readonly isNone = true;
 }
 
 /**
  * An {@link OptionExtractError} is thrown when you call the
- * {@link None.unsafeExtract | unsafeExtract} method of {@link None}.
+ * {@link OptionMethods.unsafeExtract | unsafeExtract} method of {@link None}.
  *
  * @group Errors
  */
@@ -433,7 +635,7 @@ class OptionExtractError extends Error {
    * Constructs a new {@link OptionExtractError} object with the provided
    * message. You shouldn't need to create an {@link OptionExtractError}
    * manually. It will be automatically created when you call the
-   * {@link None.unsafeExtract | unsafeExtract} method of {@link None}.
+   * {@link OptionMethods.unsafeExtract | unsafeExtract} method of {@link None}.
    *
    * @param message - A descriptive error message.
    * @returns A new {@link OptionExtractError} object.
@@ -470,51 +672,8 @@ const some = <A>(value: A): Some<A> => new Some(value);
  * The singleton {@link None} instance.
  *
  * @group Option Constructors
- *
- * @remarks
- * The type of the contained value is set to `never`. Hence, it can be assigned
- * to an {@link Option} of any type.
  */
-const none = new None<never>();
+const none = new None();
 
-/**
- * Converts the `predicate` into an isomorphic {@link Option} predicate.
- *
- * @remarks
- * {@link Option} predicates are smarter than regular predicates. A regular
- * predicate can only tell whether or not a value satisfies a certain condition.
- * However, {@link Option} predicates can also provide a proof of a value
- * satisfying the condition.
- *
- * @example
- * ```
- * interface Person {
- *   name: string;
- *   age: number;
- * }
- *
- * const michael: Person = { name: "Michael Jackson", age: 50 };
- *
- * const getPerson = (): Option<Person> =>
- *   Math.random() < 0.5 ? some(michael) : none;
- *
- * const isAdult = (person: Person): boolean => person.age >= 18;
- *
- * const adult = getPerson().flatMap(optionPredicate(isAdult));
- *
- * if (adult.some) {
- *   console.log(`${adult.value.name} is an adult`);
- * }
- * ```
- *
- * @typeParam A - The type of the input value of `predicate`.
- * @param predicate - The predicate to convert into an {@link Option} predicate.
- * @returns An {@link Option} predicate that's isomorphic to `predicate`.
- */
-const optionPredicate =
-  <A>(predicate: (value: A) => boolean) =>
-  (value: A): Option<A> =>
-    predicate(value) ? new Some(value) : none;
-
-export type { OptionMethods, Some, None, Option };
-export { OptionExtractError, some, none, optionPredicate };
+export type { Option, OptionMethods, Some, None };
+export { OptionExtractError, some, none };
